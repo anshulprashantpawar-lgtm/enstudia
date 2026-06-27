@@ -154,7 +154,7 @@ export default function EditProjectPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 rounded-lg bg-surface animate-pulse" />
+            <div key={i} className="skeleton h-12" />
           ))}
         </div>
       </div>

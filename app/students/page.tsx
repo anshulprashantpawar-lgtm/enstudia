@@ -112,7 +112,7 @@ export default function StudentsPage() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-40 rounded-xl bg-surface animate-pulse border border-border" />
+            <div key={i} className="skeleton h-40 rounded-xl border border-border" />
           ))}
         </div>
       ) : filtered.length === 0 ? (

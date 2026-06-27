@@ -50,7 +50,7 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           {loading ? (
-            <div className="w-20 h-7 rounded-lg bg-surface animate-pulse" />
+            <div className="skeleton w-20 h-7 rounded-lg" />
           ) : session ? (
             <>
               <NotificationBell />

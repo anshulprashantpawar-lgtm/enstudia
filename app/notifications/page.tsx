@@ -69,7 +69,7 @@ export default function NotificationsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-surface border border-border animate-pulse" />
+            <div key={i} className="skeleton h-20 rounded-xl border border-border" />
           ))}
         </div>
       ) : notifications.length === 0 ? (
