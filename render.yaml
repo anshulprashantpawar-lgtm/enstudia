@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: buildtogether
+    runtime: node
+    plan: free
+    # Next.js production build, then `next start` (binds to $PORT automatically)
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      # Pin Node to an LTS that Next.js 14 supports
+      - key: NODE_VERSION
+        value: "20.18.1"
+      # Random secret for NextAuth JWT signing — Render generates a value
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      # Set this to your live URL after the first deploy, e.g.
+      # https://buildtogether.onrender.com  (managed in the Render dashboard)
+      - key: NEXTAUTH_URL
+        sync: false

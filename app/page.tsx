@@ -1,100 +1,270 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { PROJECTS, MEMBERS, type Project } from "@/lib/data";
 
-export default function Home() {
+/* Warm avatar palette — no gradients, harmonizes with #FF4D00 */
+const WARM = ["#FF6B35", "#E8A04C", "#D9776B", "#C98A5E", "#E07A5F", "#B5836B", "#CC6B49", "#D98C5F"];
+
+function initials(name: string): string {
+  return name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+}
+
+/* ─── Floating hero card ──────────────────────────────────── */
+function FloatingCard({
+  project,
+  label,
+  color,
+  transform,
+}: {
+  project: Project;
+  label: string;
+  color: string;
+  transform: string;
+}) {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="relative w-52" style={{ transform }}>
+      {/* Floating label pill */}
+      <span
+        className="absolute -top-3 left-5 z-10 px-2.5 py-1 rounded-full text-2xs font-medium text-white whitespace-nowrap"
+        style={{ backgroundColor: "#1A1A1A" }}
+      >
+        {label}
+      </span>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div
+        className="bg-white border border-border rounded-2xl p-4"
+        style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
+      >
+        <div className="flex items-center gap-2.5 mb-3">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
+            style={{ backgroundColor: color }}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {initials(project.name)}
+          </div>
+          <span className="text-sm font-semibold text-ink leading-tight">{project.name}</span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+        <p className="text-xs text-ink-2 leading-relaxed line-clamp-2 mb-3">
+          {project.shortDescription}
+        </p>
+        <span className="inline-block px-2 py-0.5 rounded-full text-2xs font-medium border border-border bg-canvas text-ink-2">
+          {project.category}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const VALUE_PROPS = [
+  {
+    title: "Find your team",
+    body: "Post what you're building and meet students who bring the skills you're missing.",
+  },
+  {
+    title: "Build in public",
+    body: "Share progress, swap feedback, and grow a small crowd that's rooting for you.",
+  },
+  {
+    title: "Ship something real",
+    body: "Turn late-night ideas into projects you're proud to put your name on.",
+  },
+];
+
+export default async function HomePage() {
+  // Landing page is for signed-out visitors only
+  const session = await getServerSession(authOptions);
+  if (session?.user) redirect("/dashboard");
+
+  const byId = (id: string) => PROJECTS.find((p) => p.id === id)!;
+
+  const leftCards = [
+    { project: byId("p4"), label: "Looking for a designer", transform: "rotate(-3deg)" },
+    { project: byId("p3"), label: "Open roles", transform: "rotate(-3deg) translateX(12px)" },
+    { project: byId("p1"), label: "3 members", transform: "rotate(-3deg)" },
+  ];
+  const rightCards = [
+    { project: byId("p5"), label: "Just launched", transform: "rotate(2deg)" },
+    { project: byId("p2"), label: "Just posted", transform: "rotate(2deg) translateX(-12px)" },
+    { project: byId("p6"), label: "Looking for a developer", transform: "rotate(2deg)" },
+  ];
+
+  return (
+    <div>
+      {/* ─── Hero ─────────────────────────────────────────── */}
+      <section
+        className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-20"
+        style={{ backgroundColor: "#FAF7F2" }}
+      >
+        {/* Left floating cards (desktop only) */}
+        <div className="hidden lg:flex flex-col gap-7 absolute left-2 xl:left-10 top-1/2 -translate-y-1/2">
+          {leftCards.map((c, i) => (
+            <FloatingCard
+              key={c.project.id}
+              project={c.project}
+              label={c.label}
+              color={WARM[i % WARM.length]}
+              transform={c.transform}
+            />
+          ))}
+        </div>
+
+        {/* Right floating cards (desktop only) */}
+        <div className="hidden lg:flex flex-col gap-7 absolute right-2 xl:right-10 top-1/2 -translate-y-1/2">
+          {rightCards.map((c, i) => (
+            <FloatingCard
+              key={c.project.id}
+              project={c.project}
+              label={c.label}
+              color={WARM[(i + 3) % WARM.length]}
+              transform={c.transform}
+            />
+          ))}
+        </div>
+
+        {/* Center content */}
+        <div className="relative z-10 mx-auto max-w-2xl text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-ink leading-[1.1] tracking-tight">
+            Where ambitious students
+            <br />
+            find <span className="text-accent">their people</span>.
+          </h1>
+          <p className="mt-6 text-lg text-ink-2 leading-relaxed max-w-xl mx-auto">
+            A community of high schoolers building real projects together — and finding the
+            teammates who actually get it.
+          </p>
+          <div className="mt-9">
+            <Link
+              href="/signup"
+              className="inline-flex items-center justify-center rounded-full bg-accent hover:bg-accent-hover text-white text-base font-semibold px-8 py-4 transition-colors"
+            >
+              Get Early Access
+            </Link>
+          </div>
+
+          {/* Mobile / tablet stacked preview */}
+          <div className="lg:hidden mt-14 flex justify-center">
+            <FloatingCard
+              project={byId("p4")}
+              label="Looking for a designer"
+              color={WARM[0]}
+              transform="rotate(0deg)"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Social proof strip ───────────────────────────── */}
+      <section className="w-full" style={{ backgroundColor: "#F0EDE8" }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col items-center gap-5">
+          <p className="text-sm text-ink-2 text-center">
+            Join students from 12+ countries building real projects.
+          </p>
+          <div className="flex justify-center -space-x-3">
+            {MEMBERS.map((m, i) => (
+              <div
+                key={m.id}
+                className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold text-white"
+                style={{
+                  backgroundColor: WARM[i % WARM.length],
+                  border: "2px solid #F0EDE8",
+                }}
+                title={m.name}
+              >
+                {m.avatar}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Three value props ────────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
+        <div className="grid sm:grid-cols-3 gap-12 sm:gap-10">
+          {VALUE_PROPS.map((v) => (
+            <div key={v.title}>
+              <h3 className="text-xl font-bold text-ink tracking-tight mb-3">{v.title}</h3>
+              <p className="text-sm text-ink-2 leading-relaxed">{v.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── Project previews ─────────────────────────────── */}
+      <section className="py-16" style={{ backgroundColor: "#FAF7F2" }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex items-end justify-between mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              What students are building
+            </h2>
+            <Link
+              href="/explore"
+              className="text-sm text-ink-2 hover:text-accent transition-colors whitespace-nowrap"
+            >
+              See all projects
+            </Link>
+          </div>
+        </div>
+
+        {/* Horizontal scroll row */}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-2">
+            {PROJECTS.map((project, i) => (
+              <Link
+                key={project.id}
+                href={`/project/${project.id}`}
+                className="group shrink-0 w-[280px] bg-white border border-border rounded-2xl p-5 hover:border-ink-3 transition-colors"
+              >
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0"
+                    style={{ backgroundColor: WARM[i % WARM.length] }}
+                  >
+                    {initials(project.name)}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-ink leading-tight group-hover:text-accent transition-colors truncate">
+                      {project.name}
+                    </h3>
+                    <span className="text-2xs text-ink-3">{project.category}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-ink-2 leading-relaxed line-clamp-3 mb-4">
+                  {project.shortDescription}
+                </p>
+                <div className="flex -space-x-2">
+                  {project.members.map((m) => (
+                    <div
+                      key={m.id}
+                      className="w-6 h-6 rounded-full bg-canvas border-2 border-white flex items-center justify-center text-[9px] font-semibold text-ink-2"
+                    >
+                      {m.avatar}
+                    </div>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Minimal footer ───────────────────────────────── */}
+      <footer className="border-t border-border bg-canvas">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
+              <span className="text-white font-bold text-xs">B</span>
+            </div>
+            <span className="font-semibold text-ink text-sm tracking-tight">BuildTogether</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-ink-2">
+            <Link href="/explore" className="hover:text-accent transition-colors">Explore</Link>
+            <Link href="/signup" className="hover:text-accent transition-colors">Get Early Access</Link>
+            <Link href="/login" className="hover:text-accent transition-colors">Log in</Link>
+          </div>
+          <p className="text-xs text-ink-3">Built by students, for students.</p>
+        </div>
       </footer>
     </div>
   );

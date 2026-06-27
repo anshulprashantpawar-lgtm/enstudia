@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local file-based data store (test users, projects, etc.)
+/data/
+
+# local editor/agent tooling
+.claude/
