@@ -3,19 +3,25 @@ services:
     name: buildtogether
     runtime: node
     plan: free
-    # Next.js production build, then `next start` (binds to $PORT automatically)
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    # Build, then copy static assets next to the standalone server output.
+    buildCommand: >-
+      npm install &&
+      npm run build &&
+      cp -r .next/static .next/standalone/.next/ &&
+      (cp -r public .next/standalone/ 2>/dev/null || true)
+    # Run the minimal standalone server (low memory footprint for the free tier).
+    startCommand: node .next/standalone/server.js
     healthCheckPath: /
     autoDeploy: true
     envVars:
-      # Pin Node to an LTS that Next.js 14 supports
       - key: NODE_VERSION
         value: "20.18.1"
+      # Standalone server must bind 0.0.0.0 on Render (it reads HOST/PORT from env)
+      - key: HOSTNAME
+        value: "0.0.0.0"
       # Random secret for NextAuth JWT signing — Render generates a value
       - key: NEXTAUTH_SECRET
         generateValue: true
-      # Set this to your live URL after the first deploy, e.g.
-      # https://buildtogether.onrender.com  (managed in the Render dashboard)
+      # Set to your live URL after first deploy, e.g. https://buildtogether-tgs6.onrender.com
       - key: NEXTAUTH_URL
         sync: false
